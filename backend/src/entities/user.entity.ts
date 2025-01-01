@@ -1,9 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Event } from './event.entity';
+import { EventParticipant } from './event-participant.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -13,4 +15,10 @@ export class User {
 
   @Column()
   password: string;
+
+  @OneToMany(() => Event, (event) => event.owner)
+  events: Event[];
+
+  @OneToMany(() => EventParticipant, (participant) => participant.user)
+  invitations: EventParticipant[];
 }

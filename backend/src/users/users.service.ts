@@ -7,6 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dot';
 
 @Injectable()
 export class UsersService {
@@ -21,7 +23,7 @@ export class UsersService {
     return users.map(({ password, ...rest }) => rest);
   }
 
-  async updateUser(id: string, data: Partial<User>, userId: string) {
+  async updateUser(id: string, data: UpdateUserDto, userId: string) {
     if (id !== userId) {
       throw new ForbiddenException('You can only update your own data');
     }
@@ -58,17 +60,15 @@ export class UsersService {
     return { message: 'User deleted successfully' };
   }
 
-  async createUser(name: string, email: string, password: string) {
+  async createUser(createUserDto: CreateUserDto) {
+    const { name, email, password } = createUserDto;
     // Check if email is already in use
     const existingUser = await this.userRepository.findOne({
       where: { email },
     });
-
     if (existingUser) {
       throw new BadRequestException('Email already in use');
     }
-
-    // Create and save new user
     const newUser = this.userRepository.create({ name, email, password });
     return this.userRepository.save(newUser);
   }

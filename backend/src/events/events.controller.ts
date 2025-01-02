@@ -1,4 +1,13 @@
-import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  UseGuards,
+  Req,
+  Body,
+  Param,
+  Patch,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,5 +34,30 @@ export class EventsController {
   async getEvents(@Req() req) {
     const userId = req.user.userId;
     return this.eventsService.getEventsByUser(userId);
+  }
+
+  @Post(':id/invite')
+  async inviteUserToEvent(
+    @Param('id') eventId: string,
+    @Body('userId') userId: string,
+  ) {
+    return this.eventsService.inviteUser(eventId, userId);
+  }
+
+  @Patch(':eventId/invite/:inviteId')
+  async updateInviteStatus(
+    @Param('eventId') eventId: string,
+    @Param('inviteId') inviteId: string,
+    @Body('status') status: 'accepted' | 'rejected',
+  ) {
+    // TODO: Validate 'status' to only accept 'accepted' or 'rejected'
+    return this.eventsService.updateInviteStatus(eventId, inviteId, status);
+  }
+
+  @Get(':id/participants')
+  async getEventParticipants(@Param('id') eventId: string) {
+    // TODO: Validate that 'eventId' is a valid UUID
+    // TODO: Return 404 if the event does not exist
+    return this.eventsService.getEventParticipants(eventId);
   }
 }

@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
@@ -9,6 +14,49 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
   ) {}
+
+  async getAllUsers() {
+    const users = await this.userRepository.find();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    return users.map(({ password, ...rest }) => rest);
+  }
+
+  async updateUser(id: string, data: Partial<User>, userId: string) {
+    if (id !== userId) {
+      throw new ForbiddenException('You can only update your own data');
+    }
+
+    if (data.email) {
+      const existingUser = await this.userRepository.findOne({
+        where: { email: data.email },
+      });
+      if (existingUser && existingUser.id !== id) {
+        throw new ForbiddenException('Email already in use');
+      }
+    }
+
+    await this.userRepository.update(id, data);
+    const updatedUser = await this.userRepository.findOne({ where: { id } });
+    if (!updatedUser) {
+      throw new NotFoundException('User not found');
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...rest } = updatedUser;
+    return rest;
+  }
+
+  async deleteUser(id: string, userId: string) {
+    //TODO: implement error when user has events
+    if (id !== userId) {
+      throw new ForbiddenException('You can only delete your own account');
+    }
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.userRepository.delete(id);
+    return { message: 'User deleted successfully' };
+  }
 
   async createUser(name: string, email: string, password: string) {
     // Check if email is already in use

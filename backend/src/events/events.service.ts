@@ -1,8 +1,13 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, LessThan, MoreThan } from 'typeorm';
 import { Event } from '../entities/event.entity';
 import { User } from '../entities/user.entity';
+import { EventParticipant } from '../entities/event-participant.entity';
 
 @Injectable()
 export class EventsService {
@@ -11,6 +16,8 @@ export class EventsService {
     private readonly eventRepository: Repository<Event>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(EventParticipant)
+    private readonly eventParticipantRepository: Repository<EventParticipant>,
   ) {}
 
   async createEvent(
@@ -57,6 +64,53 @@ export class EventsService {
     });
 
     return this.eventRepository.save(newEvent);
+  }
+
+  async inviteUser(eventId: string, userId: string) {
+    const event = await this.eventRepository.findOne({
+      where: { id: eventId },
+      relations: ['owner'],
+    });
+    if (!event) throw new NotFoundException('Event not found');
+    if (event.owner.id === userId)
+      throw new BadRequestException('Cannot invite yourself');
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const invitation = this.eventParticipantRepository.create({
+      event,
+      user,
+      status: 'pending',
+    });
+    return this.eventParticipantRepository.save(invitation);
+  }
+
+  async updateInviteStatus(
+    eventId: string,
+    inviteId: string,
+    status: 'accepted' | 'rejected',
+  ) {
+    const invitation = await this.eventParticipantRepository.findOne({
+      where: { id: inviteId, event: { id: eventId } },
+      relations: ['event', 'user'],
+    });
+    if (!invitation) throw new NotFoundException('Invitation not found');
+
+    invitation.status = status;
+    return this.eventParticipantRepository.save(invitation);
+  }
+
+  async getEventParticipants(eventId: string) {
+    const participants = await this.eventParticipantRepository.find({
+      where: { event: { id: eventId }, status: 'accepted' },
+      relations: ['user'],
+    });
+    return participants.map((p) => ({
+      id: p.user.id,
+      name: p.user.name,
+      email: p.user.email,
+    }));
   }
 
   async getEventsByUser(userId: string) {

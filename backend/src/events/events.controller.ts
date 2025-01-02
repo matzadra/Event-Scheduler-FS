@@ -7,6 +7,7 @@ import {
   Body,
   Param,
   Patch,
+  Delete,
 } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
@@ -52,6 +53,22 @@ export class EventsController {
   ) {
     // TODO: Validate 'status' to only accept 'accepted' or 'rejected'
     return this.eventsService.updateInviteStatus(eventId, inviteId, status);
+  }
+
+  @Patch(':id')
+  async updateEvent(
+    @Param('id') eventId: string,
+    @Body() updateEventDto: Partial<CreateEventDto>,
+    @Req() req,
+  ) {
+    const userId = req.user.userId; // ID do usuário autenticado
+    return this.eventsService.updateEvent(eventId, updateEventDto, userId);
+  }
+
+  @Delete(':id')
+  async deleteEvent(@Param('id') eventId: string, @Req() req) {
+    const userId = req.user.userId; // ID do usuário autenticado
+    return this.eventsService.deleteEvent(eventId, userId);
   }
 
   @Get(':id/participants')

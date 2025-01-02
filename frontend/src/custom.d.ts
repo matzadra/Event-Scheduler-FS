@@ -1,5 +1,8 @@
-declare module '*.svg' {
-    const content: string;
-    export default content;
+declare namespace NodeJS {
+  interface Module {
+    hot?: {
+      accept(path?: string, callback?: () => void): void;
+      accept(callback?: () => void): void;
+    };
   }
-  
+}

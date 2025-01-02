@@ -4,10 +4,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, LessThan, MoreThan } from 'typeorm';
+import { Repository, Between, LessThan, MoreThan, Not } from 'typeorm';
 import { Event } from '../entities/event.entity';
 import { User } from '../entities/user.entity';
 import { EventParticipant } from '../entities/event-participant.entity';
+import { CreateEventDto } from './dto/create-event.dto';
 
 @Injectable()
 export class EventsService {
@@ -64,6 +65,60 @@ export class EventsService {
     });
 
     return this.eventRepository.save(newEvent);
+  }
+
+  async updateEvent(
+    eventId: string,
+    updateEventDto: Partial<CreateEventDto>,
+    userId: string,
+  ) {
+    // Busca o evento, garantindo que ele pertence ao usuário autenticado
+    const event = await this.eventRepository.findOne({
+      where: { id: eventId, owner: { id: userId } },
+      relations: ['owner'],
+    });
+
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    if (updateEventDto.description) {
+      event.description = updateEventDto.description;
+    }
+    if (updateEventDto.startTime) {
+      event.startTime = new Date(updateEventDto.startTime);
+    }
+    if (updateEventDto.endTime) {
+      event.endTime = new Date(updateEventDto.endTime);
+    }
+    if (event.startTime >= event.endTime) {
+      throw new BadRequestException('Start time must be earlier than end time');
+    }
+    //overlapping events check
+    const overlappingEvent = await this.eventRepository.findOne({
+      where: [
+        {
+          owner: { id: userId },
+          startTime: LessThan(event.endTime),
+          endTime: MoreThan(event.startTime),
+          id: Not(eventId), // Exclude the current event from the query
+        },
+      ],
+    });
+    if (overlappingEvent) {
+      throw new BadRequestException('Event overlaps with an existing event');
+    }
+    return this.eventRepository.save(event);
+  }
+
+  async deleteEvent(eventId: string, userId: string): Promise<void> {
+    const event = await this.eventRepository.findOne({
+      where: { id: eventId, owner: { id: userId } },
+      relations: ['owner'],
+    });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+    await this.eventRepository.delete(eventId);
   }
 
   async inviteUser(eventId: string, userId: string) {

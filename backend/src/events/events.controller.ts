@@ -1,18 +1,17 @@
-import { Controller, Post, Get, Body } from '@nestjs/common';
+import { Controller, Post, Get, UseGuards, Req, Body } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
-//import { AuthGuard } from '@nestjs/passport';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('events')
-//@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt')) // Protect all routes in this controller
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
-  //@Req() req,
+
   @Post()
-  async createEvent(@Body() createEventDto: CreateEventDto) {
-    //const userId = req.user.id;
+  async createEvent(@Body() createEventDto: CreateEventDto, @Req() req) {
     const { description, startTime, endTime } = createEventDto;
-    const userId = 'd54f60aa-9d61-4d0b-91e2-430b6039b9ae'; // hardcoded for now
+    const userId = req.user.userId;
 
     return this.eventsService.createEvent(
       description,
@@ -23,8 +22,8 @@ export class EventsController {
   }
 
   @Get()
-  async getEvents() {
-    const userId = 'd54f60aa-9d61-4d0b-91e2-430b6039b9ae'; // Mock user
+  async getEvents(@Req() req) {
+    const userId = req.user.userId;
     return this.eventsService.getEventsByUser(userId);
   }
 }

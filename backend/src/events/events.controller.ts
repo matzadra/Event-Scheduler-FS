@@ -77,4 +77,43 @@ export class EventsController {
     // TODO: Return 404 if the event does not exist
     return this.eventsService.getEventParticipants(eventId);
   }
+
+  @Get('/rsvp')
+  @UseGuards(AuthGuard('jwt'))
+  async getRSVPs(@Req() req) {
+    const userId = req.user.userId;
+    const received = await this.eventsService.getReceivedInvites(userId);
+    const sent = await this.eventsService.getSentInvites(userId);
+
+    return {
+      received: received.map((invite) => ({
+        id: invite.id,
+        event: {
+          id: invite.event.id,
+          description: invite.event.description,
+          startTime: invite.event.startTime,
+          endTime: invite.event.endTime,
+        },
+        inviter: {
+          id: invite.event.owner.id,
+          name: invite.event.owner.name,
+        },
+        status: invite.status,
+      })),
+      sent: sent.map((invite) => ({
+        id: invite.id,
+        event: {
+          id: invite.event.id,
+          description: invite.event.description,
+          startTime: invite.event.startTime,
+          endTime: invite.event.endTime,
+        },
+        recipient: {
+          id: invite.user.id,
+          name: invite.user.name,
+        },
+        status: invite.status,
+      })),
+    };
+  }
 }

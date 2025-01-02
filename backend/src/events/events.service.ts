@@ -168,6 +168,20 @@ export class EventsService {
     }));
   }
 
+  async getReceivedInvites(userId: string) {
+    return this.eventParticipantRepository.find({
+      where: { user: { id: userId }, status: 'pending' },
+      relations: ['event', 'event.owner'],
+    });
+  }
+
+  async getSentInvites(userId: string) {
+    return this.eventParticipantRepository.find({
+      where: { event: { owner: { id: userId } } },
+      relations: ['event', 'user'],
+    });
+  }
+
   async getEventsByUser(userId: string) {
     return this.eventRepository.find({
       where: { owner: { id: userId } },

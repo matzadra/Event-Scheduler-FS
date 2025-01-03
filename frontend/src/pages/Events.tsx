@@ -22,6 +22,9 @@ const Events = () => {
     endTime: string;
     start: Date;
     end: Date;
+    title: string;
+    inviterName?: string; // Nome do convidador (inviter)
+    accepted?: boolean; // Indica se o evento foi aceito
   }
 
   const [events, setEvents] = useState<Event[]>([]);
@@ -40,17 +43,52 @@ const Events = () => {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const response = await axios.get("http://localhost:3000/events", {
+      const createdResponse = await axios.get("http://localhost:3000/events", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const formattedEvents = response.data.map((event: any) => ({
-        ...event,
+
+      const acceptedResponse = await axios.get(
+        "http://localhost:3000/events/rsvp",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      const createdEvents = createdResponse.data.map((event: any) => ({
+        id: event.id,
+        title: event.description,
         start: new Date(event.startTime),
         end: new Date(event.endTime),
+        color: "#00ff8a",
+        accepted: false,
       }));
-      setEvents(formattedEvents);
+
+      const acceptedEvents = acceptedResponse.data.received
+        .filter((invite: any) => invite.status === "accepted")
+        .map((invite: any) => ({
+          id: invite.event.id,
+          title: invite.event.description,
+          start: new Date(invite.event.startTime),
+          end: new Date(invite.event.endTime),
+          color: "#008C4A", // Cor diferenciada para eventos aceitos
+          accepted: true, // Flag indicando evento aceito
+          inviterName: invite.inviter.name, // Nome do convidador (inviter)
+        }));
+
+      const uniqueEvents = Array.from(
+        new Map(
+          [...createdEvents, ...acceptedEvents].map((event) => [
+            event.id,
+            event,
+          ])
+        ).values()
+      );
+      console.log(uniqueEvents);
+      console.log(createdEvents);
+
+      setEvents(uniqueEvents);
     } catch (err) {
-      console.error("Failed to fetch events");
+      console.error("Failed to fetch events:", err);
     }
   }, [token]);
 
@@ -69,6 +107,7 @@ const Events = () => {
                   ...response.data,
                   start: new Date(response.data.startTime),
                   end: new Date(response.data.endTime),
+                  title: response.data.description,
                 }
               : event
           )
@@ -85,6 +124,7 @@ const Events = () => {
             ...response.data,
             start: new Date(response.data.startTime),
             end: new Date(response.data.endTime),
+            title: response.data.description,
           },
         ]);
       }
@@ -110,9 +150,9 @@ const Events = () => {
   const openModal = (event?: Event) => {
     if (event) {
       setCurrentEvent(event);
-      setDescription(event.description);
-      setStartTime(dateToLocalInputValue(new Date(event.startTime)));
-      setEndTime(dateToLocalInputValue(new Date(event.endTime)));
+      setDescription(event.description || event.title);
+      setStartTime(dateToLocalInputValue(event.start));
+      setEndTime(dateToLocalInputValue(event.end));
     } else {
       setCurrentEvent(null);
       setDescription("");
@@ -130,17 +170,15 @@ const Events = () => {
     setCurrentEvent(null);
   };
 
-  const eventStyleGetter = () => {
-    return {
-      style: {
-        backgroundColor: "#00ff8a",
-        color: "#121212",
-        borderRadius: "5px",
-        border: "none",
-        padding: "5px",
-      },
-    };
-  };
+  const eventStyleGetter = (event: any) => ({
+    style: {
+      backgroundColor: event.color,
+      color: "#121212",
+      borderRadius: "5px",
+      border: "none",
+      padding: "5px",
+    },
+  });
 
   useEffect(() => {
     fetchEvents();
@@ -152,15 +190,49 @@ const Events = () => {
       <button className="btn btn-primary mb-3" onClick={() => openModal()}>
         Add Event
       </button>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 500, margin: "50px 0" }}
-        onSelectEvent={openModal}
-        eventPropGetter={eventStyleGetter}
-      />
+      {events.length > 0 ? (
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          titleAccessor="title"
+          style={{ height: 500, margin: "50px 0" }}
+          eventPropGetter={eventStyleGetter}
+          onSelectEvent={(event) =>
+            event.accepted ? undefined : openModal(event)
+          }
+        />
+      ) : (
+        <p>Loading events...</p>
+      )}
+      <div className="mt-4">
+        <h2>All Participated Events</h2>
+        <ul className="list-group matrix-style">
+          {events.map((event) => (
+            <li
+              key={event.id}
+              className="list-group-item matrix-hover"
+              onClick={event.accepted ? undefined : () => openModal(event)}
+              style={{ cursor: "pointer" }}
+            >
+              <strong>{event.title}</strong> <br />
+              From: {event.start.toLocaleString()} <br />
+              To: {event.end.toLocaleString()} <br />
+              {event.accepted && (
+                <p>
+                  <strong>Invited By:</strong> {event.inviterName}
+                </p>
+              )}
+              <span
+                className={`badge ${event.accepted ? "bg-info" : "bg-success"}`}
+              >
+                {event.accepted ? "Accepted Invite" : "Created"}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
 
       {showModal && (
         <div
@@ -171,17 +243,14 @@ const Events = () => {
           <div
             className="modal-dialog"
             style={{
-              backgroundColor: "#1a1a1a", // Fundo escuro
+              backgroundColor: "#1a1a1a",
               borderRadius: "8px",
               padding: "10px",
             }}
           >
             <div
               className="modal-content"
-              style={{
-                backgroundColor: "#2c2c2c", // Fundo escuro do modal
-                color: "#ffffff", // Texto claro
-              }}
+              style={{ backgroundColor: "#2c2c2c", color: "#ffffff" }}
             >
               <div className="modal-header">
                 <h5 className="modal-title">
@@ -191,86 +260,47 @@ const Events = () => {
                   type="button"
                   className="btn-close"
                   onClick={closeModal}
-                  style={{
-                    backgroundColor: "#444", // Botão de fechar com fundo escuro
-                    color: "#fff", // Texto branco
-                  }}
                 ></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label style={{ color: "#cccccc" }}>Description</label>
+                  <label>Description</label>
                   <input
                     type="text"
                     className="form-control"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    style={{
-                      backgroundColor: "#333333",
-                      color: "#ffffff",
-                      border: "1px solid #555",
-                    }}
                   />
                 </div>
                 <div className="mb-3">
-                  <label style={{ color: "#cccccc" }}>Start Time</label>
+                  <label>Start Time</label>
                   <input
                     type="datetime-local"
                     className="form-control"
                     value={startTime}
                     onChange={(e) => setStartTime(e.target.value)}
-                    style={{
-                      backgroundColor: "#333333",
-                      color: "#ffffff",
-                      border: "1px solid #555",
-                    }}
                   />
                 </div>
                 <div className="mb-3">
-                  <label style={{ color: "#cccccc" }}>End Time</label>
+                  <label>End Time</label>
                   <input
                     type="datetime-local"
                     className="form-control"
                     value={endTime}
                     onChange={(e) => setEndTime(e.target.value)}
-                    style={{
-                      backgroundColor: "#333333",
-                      color: "#ffffff",
-                      border: "1px solid #555",
-                    }}
                   />
                 </div>
               </div>
               <div className="modal-footer">
                 {currentEvent && (
-                  <button
-                    className="btn btn-danger"
-                    onClick={deleteEvent}
-                    style={{ borderRadius: "5px" }}
-                  >
+                  <button className="btn btn-danger" onClick={deleteEvent}>
                     Delete
                   </button>
                 )}
-                <button
-                  className="btn btn-secondary"
-                  onClick={closeModal}
-                  style={{
-                    backgroundColor: "#444",
-                    color: "#ffffff",
-                    borderRadius: "5px",
-                  }}
-                >
+                <button className="btn btn-secondary" onClick={closeModal}>
                   Cancel
                 </button>
-                <button
-                  className="btn btn-success"
-                  onClick={saveEvent}
-                  style={{
-                    backgroundColor: "#00cc44",
-                    color: "#ffffff",
-                    borderRadius: "5px",
-                  }}
-                >
+                <button className="btn btn-success" onClick={saveEvent}>
                   Save
                 </button>
               </div>

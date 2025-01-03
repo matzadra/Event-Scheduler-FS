@@ -15,7 +15,17 @@ const Login = () => {
         email,
         password,
       });
-      localStorage.setItem("token", response.data.access_token);
+
+      const { access_token } = response.data;
+
+      // Decode the JWT payload to get the user ID
+      const decoded = JSON.parse(atob(access_token.split(".")[1])); // Decode the JWT payload
+      const userId = decoded.sub; // Gets the user ID from the JWT payload
+
+      // Store the token and user ID in local storage
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("userId", userId);
+
       setError("");
       navigate("/events");
     } catch (err: any) {

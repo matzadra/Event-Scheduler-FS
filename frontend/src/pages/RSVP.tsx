@@ -11,6 +11,7 @@ const RSVPPage = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [, setEvents] = useState<any[]>([]);
 
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
@@ -55,10 +56,32 @@ const RSVPPage = () => {
     }
   }, [token, userId]);
 
+  const fetchAcceptedInvites = useCallback(async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/events/rsvp", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const acceptedEvents = response.data.received
+        .filter((invite: any) => invite.status === "accepted")
+        .map((invite: any) => ({
+          ...invite.event,
+          start: new Date(invite.event.startTime),
+          end: new Date(invite.event.endTime),
+        }));
+      setEvents((prevEvents) => [...prevEvents, ...acceptedEvents]);
+    } catch (err) {
+      setError("Failed to fetch accepted invites.");
+    }
+  }, [token]);
+
   useEffect(() => {
-    fetchUsers();
-    fetchInvites();
-  }, [fetchUsers, fetchInvites]);
+    const fetchAllData = async () => {
+      await fetchUsers();
+      await fetchInvites();
+      await fetchAcceptedInvites();
+    };
+    fetchAllData();
+  }, [fetchUsers, fetchInvites, fetchAcceptedInvites]);
 
   const sendInvite = async () => {
     if (!selectedUser || !selectedEventId) return;
@@ -76,12 +99,13 @@ const RSVPPage = () => {
   };
 
   const updateInviteStatus = async (
+    eventId: string,
     inviteId: string,
     status: "accepted" | "rejected"
   ) => {
     try {
       await axios.patch(
-        `http://localhost:3000/events/invite/${inviteId}`,
+        `http://localhost:3000/events/${eventId}/invite/${inviteId}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -125,10 +149,17 @@ const RSVPPage = () => {
         ) : (
           <ListGroup>
             {receivedInvites.map((invite) => (
-              <ListGroup.Item key={invite.id}>
+              <ListGroup.Item key={invite.id} className="matrix-style">
                 <strong>Event:</strong> {invite.event.description} <br />
+                <strong>Date:</strong>{" "}
+                {new Date(invite.event.startTime).toLocaleString()} -{" "}
+                {new Date(invite.event.endTime).toLocaleString()} <br />
                 <strong>From:</strong> {invite.inviter.name} <br />
-                <Badge bg={invite.status === "pending" ? "warning" : "success"}>
+                <strong>Status:</strong>{" "}
+                <Badge
+                  bg={invite.status === "pending" ? "warning" : "success"}
+                  className="matrix-badge"
+                >
                   {invite.status.toUpperCase()}
                 </Badge>
                 {invite.status === "pending" && (
@@ -137,7 +168,13 @@ const RSVPPage = () => {
                       variant="success"
                       size="sm"
                       className="ms-2"
-                      onClick={() => updateInviteStatus(invite.id, "accepted")}
+                      onClick={() =>
+                        updateInviteStatus(
+                          invite.event.id,
+                          invite.id,
+                          "accepted"
+                        )
+                      }
                     >
                       Accept
                     </Button>
@@ -145,7 +182,13 @@ const RSVPPage = () => {
                       variant="danger"
                       size="sm"
                       className="ms-2"
-                      onClick={() => updateInviteStatus(invite.id, "rejected")}
+                      onClick={() =>
+                        updateInviteStatus(
+                          invite.event.id,
+                          invite.id,
+                          "rejected"
+                        )
+                      }
                     >
                       Reject
                     </Button>
@@ -165,10 +208,24 @@ const RSVPPage = () => {
         ) : (
           <ListGroup>
             {sentInvites.map((invite) => (
-              <ListGroup.Item key={invite.id}>
+              <ListGroup.Item key={invite.id} className="matrix-style">
                 <strong>Event:</strong> {invite.event.description} <br />
+                <strong>Date:</strong>{" "}
+                {new Date(invite.event.startTime).toLocaleString()} -{" "}
+                {new Date(invite.event.endTime).toLocaleString()} <br />
                 <strong>To:</strong> {invite.recipient.name} <br />
-                <Badge bg="info">{invite.status.toUpperCase()}</Badge>
+                <Badge
+                  bg={
+                    invite.status === "pending"
+                      ? "warning"
+                      : invite.status === "accepted"
+                      ? "success"
+                      : "danger"
+                  }
+                  className="matrix-badge"
+                >
+                  {invite.status.toUpperCase()}
+                </Badge>
               </ListGroup.Item>
             ))}
           </ListGroup>
@@ -183,7 +240,6 @@ const RSVPPage = () => {
         <Modal.Body className="matrix-modal-body">
           <Form>
             <Form.Group>
-              <Form.Label>Choose an Event</Form.Label>
               <Form.Select
                 onChange={(e) => setSelectedEventId(e.target.value)}
                 value={selectedEventId || ""}
@@ -192,7 +248,8 @@ const RSVPPage = () => {
                 {userEvents.map((event) => (
                   <option key={event.id} value={event.id}>
                     {event.description} -{" "}
-                    {new Date(event.start).toLocaleString()}
+                    {new Date(event.startTime).toLocaleString()} to{" "}
+                    {new Date(event.endTime).toLocaleString()}
                   </option>
                 ))}
               </Form.Select>

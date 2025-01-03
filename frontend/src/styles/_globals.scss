@@ -21,30 +21,35 @@ a {
     color: $button-hover-color;
   }
 }
-
 .matrix-style {
+  font-family: "Roboto Mono", monospace;
   color: #00ff8a;
-  font-family: "Orbitron", sans-serif;
-  text-shadow: 0 0 10px #00ff8a;
 }
 
 .matrix-hover {
   background-color: #121212;
-  color: #e0e0e0;
+  color: #00ff8a;
+  border: 1px solid #00ff8a;
   transition: all 0.3s ease;
-  &:hover {
-    background-color: #00ff8a;
-    color: #121212;
-  }
 }
 
-.matrix-modal-header,
-.matrix-modal-body,
-.matrix-modal-footer {
+.matrix-hover:hover {
+  background-color: #1e1e1e;
+}
+
+.matrix-modal-header {
+  background-color: #121212;
+  color: #00ff8a;
+}
+
+.matrix-modal-body {
   background-color: #1e1e1e;
   color: #00ff8a;
-  border: none;
-  text-shadow: 0 0 5px #00ff8a;
+}
+
+.matrix-modal-footer {
+  background-color: #121212;
+  color: #00ff8a;
 }
 
 button {

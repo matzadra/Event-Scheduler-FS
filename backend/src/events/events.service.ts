@@ -170,7 +170,7 @@ export class EventsService {
 
   async getReceivedInvites(userId: string) {
     return this.eventParticipantRepository.find({
-      where: { user: { id: userId }, status: 'pending' },
+      where: { user: { id: userId } },
       relations: ['event', 'event.owner'],
     });
   }

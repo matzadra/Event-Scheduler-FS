@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Modal, Button, Form, ListGroup, Badge } from "react-bootstrap";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const RSVPPage = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -11,7 +13,7 @@ const RSVPPage = () => {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [, setEvents] = useState<any[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
 
   const token = localStorage.getItem("token");
   const userId = localStorage.getItem("userId");
@@ -93,8 +95,10 @@ const RSVPPage = () => {
       );
       setShowModal(false);
       fetchInvites();
+      toast.success("Invite sent successfully!");
     } catch (err) {
       setError("Failed to send invite.");
+      toast.error("Failed to send invite.");
     }
   };
 
@@ -104,14 +108,77 @@ const RSVPPage = () => {
     status: "accepted" | "rejected"
   ) => {
     try {
+      if (status === "accepted") {
+        // Fetch de eventos para validação de conflitos
+        const fetchedEvents = await axios.get("http://localhost:3000/events", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const fetchedAcceptedInvites = await axios.get(
+          "http://localhost:3000/events/rsvp",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        const createdEvents = fetchedEvents.data.map((event: any) => ({
+          id: event.id,
+          start: new Date(event.startTime),
+          end: new Date(event.endTime),
+        }));
+
+        const acceptedEvents = fetchedAcceptedInvites.data.received
+          .filter((invite: any) => invite.status === "accepted")
+          .map((invite: any) => ({
+            id: invite.event.id,
+            start: new Date(invite.event.startTime),
+            end: new Date(invite.event.endTime),
+          }));
+
+        const allEvents = [...createdEvents, ...acceptedEvents];
+
+        // Encontra o convite atual
+        const inviteToCheck = receivedInvites.find(
+          (invite: any) => invite.id === inviteId
+        );
+
+        if (!inviteToCheck) {
+          toast.error("Invite not found for conflict check.");
+          return;
+        }
+
+        const inviteStartTime = new Date(inviteToCheck.event.startTime);
+        const inviteEndTime = new Date(inviteToCheck.event.endTime);
+
+        // Valida conflitos
+        const hasConflict = allEvents.some((existingEvent: any) => {
+          return (
+            existingEvent.start < inviteEndTime &&
+            existingEvent.end > inviteStartTime
+          );
+        });
+
+        if (hasConflict) {
+          toast.error("This event conflicts with an existing one!");
+          return;
+        }
+      }
+
+      // Atualiza o status do convite
       await axios.patch(
         `http://localhost:3000/events/${eventId}/invite/${inviteId}`,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      // Atualiza os dados após a ação
       fetchInvites();
+      toast.success(
+        `Invite ${
+          status === "accepted" ? "accepted" : "declined"
+        } successfully!`
+      );
     } catch (err) {
-      setError("Failed to update invite status.");
+      toast.error("Failed to update invite status.");
     }
   };
 
@@ -120,7 +187,7 @@ const RSVPPage = () => {
       <h1 className="text-center matrix-style mb-4">RSVP Management</h1>
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {}
+      {/* Lista de Usuários */}
       <div className="mb-4">
         <h3 className="matrix-style">Users</h3>
         <ListGroup>
@@ -141,7 +208,7 @@ const RSVPPage = () => {
         </ListGroup>
       </div>
 
-      {}
+      {/* Convites Recebidos */}
       <div className="mb-4">
         <h3 className="matrix-style">Received Invites</h3>
         {receivedInvites.length === 0 ? (
@@ -200,7 +267,7 @@ const RSVPPage = () => {
         )}
       </div>
 
-      {}
+      {/* Convites Enviados */}
       <div className="mb-4">
         <h3 className="matrix-style">Sent Invites</h3>
         {sentInvites.length === 0 ? (
@@ -232,7 +299,7 @@ const RSVPPage = () => {
         )}
       </div>
 
-      {}
+      {/* Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton className="matrix-modal-header">
           <Modal.Title>Select Event</Modal.Title>

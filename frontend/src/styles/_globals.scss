@@ -24,6 +24,7 @@ a {
 .matrix-style {
   font-family: "Roboto Mono", monospace;
   color: #00ff8a;
+  background-color: #1e1e1e;
 }
 
 .matrix-hover {
@@ -102,4 +103,48 @@ select {
       color: $primary-color;
     }
   }
+}
+.list-group-item.matrix-hover {
+  background-color: #121212;
+  color: #00ff8a;
+  border: 1px solid #00ff8a;
+  transition: all 0.3s ease-in-out;
+}
+
+.list-group-item.matrix-hover:hover {
+  background-color: #1e1e1e;
+  color: #00ff8a;
+}
+.rsvp-list {
+  background-color: #1e1e1e;
+  border: 1px solid #00ff8a;
+  color: #00ff8a;
+}
+
+.rsvp-list-item {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #00ff8a;
+  background-color: #121212;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.rsvp-list-item:hover {
+  background-color: #1e1e1e;
+}
+
+.badge {
+  font-size: 0.9rem;
+}
+
+.badge.bg-success {
+  background-color: #008c4a;
+}
+
+.badge.bg-warning {
+  background-color: #ffa500;
+}
+
+.badge.bg-danger {
+  background-color: #ff5252;
 }

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -83,12 +85,10 @@ const Events = () => {
           ])
         ).values()
       );
-      console.log(uniqueEvents);
-      console.log(createdEvents);
 
       setEvents(uniqueEvents);
     } catch (err) {
-      console.error("Failed to fetch events:", err);
+      toast.error("Failed to fetch events.");
     }
   }, [token]);
 
@@ -112,6 +112,7 @@ const Events = () => {
               : event
           )
         );
+        toast.success("Event updated successfully!");
       } else {
         const response = await axios.post(
           "http://localhost:3000/events",
@@ -127,10 +128,11 @@ const Events = () => {
             title: response.data.description,
           },
         ]);
+        toast.success("Event created successfully!");
       }
       closeModal();
     } catch (err) {
-      console.error("Failed to save event");
+      toast.error("Failed to save event.");
     }
   };
 
@@ -141,9 +143,10 @@ const Events = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEvents((prev) => prev.filter((event) => event.id !== currentEvent.id));
+      toast.success("Event deleted successfully!");
       closeModal();
     } catch (err) {
-      console.error("Failed to delete event");
+      toast.error("Failed to delete event.");
     }
   };
 
@@ -200,7 +203,9 @@ const Events = () => {
           style={{ height: 500, margin: "50px 0" }}
           eventPropGetter={eventStyleGetter}
           onSelectEvent={(event) =>
-            event.accepted ? undefined : openModal(event)
+            event.accepted
+              ? toast.info("Accepted events cannot be edited or deleted.")
+              : openModal(event)
           }
         />
       ) : (
@@ -213,7 +218,11 @@ const Events = () => {
             <li
               key={event.id}
               className="list-group-item matrix-hover"
-              onClick={event.accepted ? undefined : () => openModal(event)}
+              onClick={
+                event.accepted
+                  ? () => toast.info("Accepted events cannot be edited.")
+                  : () => openModal(event)
+              }
               style={{ cursor: "pointer" }}
             >
               <strong>{event.title}</strong> <br />

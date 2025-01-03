@@ -27,7 +27,7 @@ const Register = () => {
         formData
       );
       console.log("User registered:", response.data);
-      navigate("/login"); // Redirect to login page
+      navigate("/login");
     } catch (err: any) {
       console.error("Registration error:", err.response?.data || err.message);
       setError(err.response?.data?.message || "An error occurred");

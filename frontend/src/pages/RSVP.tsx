@@ -33,7 +33,7 @@ const RSVPPage = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      fetchInvites(); // Atualiza os convites após a ação
+      fetchInvites();
     } catch (err) {
       setError("Failed to update invite status");
     }

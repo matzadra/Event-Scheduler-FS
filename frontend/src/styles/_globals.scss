@@ -1,0 +1,75 @@
+// Matrix Theme colors
+$background-color: #121212;
+$primary-color: #00ff8a;
+$text-color-primary: #e0e0e0;
+$text-color-secondary: #b3b3b3;
+$button-hover-color: #008c4a;
+$error-color: #ff5252;
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: $background-color;
+  color: $text-color-primary;
+  font-family: "Poppins", sans-serif;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+  &:hover {
+    color: $button-hover-color;
+  }
+}
+
+button {
+  background-color: $primary-color;
+  color: $background-color;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+
+  &:hover {
+    background-color: $button-hover-color;
+  }
+
+  &:disabled {
+    background-color: $text-color-secondary;
+    cursor: not-allowed;
+  }
+}
+
+input,
+textarea,
+select {
+  background-color: transparent;
+  border: 1px solid $primary-color;
+  color: $text-color-primary;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  outline: none;
+
+  &:focus {
+    border-color: $button-hover-color;
+    box-shadow: 0 0 5px $primary-color;
+  }
+}
+
+.navbar {
+  background-color: rgba(18, 18, 18, 0.85);
+  padding: 1rem;
+  border-bottom: 1px solid $primary-color;
+
+  a {
+    color: $text-color-primary;
+    font-weight: bold;
+    margin-right: 1rem;
+    &:hover {
+      color: $primary-color;
+    }
+  }
+}

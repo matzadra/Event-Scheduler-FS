@@ -1,0 +1,25 @@
+@use "./_bootstrap-custom";
+@use "~bootstrap/scss/bootstrap";
+@use "./_globals";
+
+//react-big-calendar styles
+.rbc-today {
+  background-color: #1e1e1e !important;
+  color: #00ff8a !important;
+}
+
+.rbc-header {
+  color: #e0e0e0;
+}
+
+.rbc-day-bg {
+  color: #b3b3b3;
+}
+
+.rbc-event {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 4px;
+  border-radius: 4px;
+}

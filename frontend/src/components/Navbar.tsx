@@ -1,11 +1,9 @@
 import React from "react";
-import { Navbar, Nav, Container } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 
-const AppNavbar = () => {
-  const navigate = useNavigate();
+const Navbar = () => {
   const token = localStorage.getItem("token");
-  const isAuthenticated = !!token;
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -13,41 +11,50 @@ const AppNavbar = () => {
   };
 
   return (
-    <Navbar bg="dark" variant="dark" expand="lg" className="mb-4">
-      <Container>
-        <Navbar.Brand as={Link} to="/" className="text-neon">
+    <nav
+      className="navbar navbar-expand-lg navbar-dark"
+      style={{ backgroundColor: "#1E1E1E" }}
+    >
+      <div className="container-fluid">
+        <Link className="navbar-brand" to="/" style={{ color: "#00FF8A" }}>
           Event Scheduler
-        </Navbar.Brand>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
-        <Navbar.Collapse id="basic-navbar-nav">
-          <Nav className="me-auto">
-            {isAuthenticated ? (
+        </Link>
+        <div className="collapse navbar-collapse justify-content-end">
+          <ul className="navbar-nav">
+            {token ? (
               <>
-                <Nav.Link as={Link} to="/events" className="text-neon">
-                  Events
-                </Nav.Link>
-                <Nav.Link as={Link} to="/rsvp" className="text-neon">
-                  RSVP
-                </Nav.Link>
-                <Nav.Link onClick={handleLogout} className="text-neon">
-                  Logout
-                </Nav.Link>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/events">
+                    Events
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link" to="/rsvp">
+                    RSVPs
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <span
+                    className="nav-link"
+                    style={{ cursor: "pointer" }}
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </span>
+                </li>
               </>
             ) : (
-              <>
-                <Nav.Link as={Link} to="/login" className="text-neon">
-                  Login
-                </Nav.Link>
-                <Nav.Link as={Link} to="/register" className="text-neon">
-                  Register
-                </Nav.Link>
-              </>
+              <li className="nav-item">
+                <Link className="nav-link" to="/login">
+                  Login / Register
+                </Link>
+              </li>
             )}
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
+          </ul>
+        </div>
+      </div>
+    </nav>
   );
 };
 
-export default AppNavbar;
+export default Navbar;

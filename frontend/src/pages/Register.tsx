@@ -1,76 +1,99 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [error, setError] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      setError(null);
-      const response = await axios.post(
-        "http://localhost:3000/users",
-        formData
-      );
-      console.log("User registered:", response.data);
-      navigate("/login");
+      await axios.post("http://localhost:3000/users", {
+        name,
+        email,
+        password,
+      });
+      setSuccess(true);
+      setError("");
+      setTimeout(() => navigate("/login"), 3000);
     } catch (err: any) {
-      console.error("Registration error:", err.response?.data || err.message);
-      setError(err.response?.data?.message || "An error occurred");
+      setError("Failed to register. Please check your input.");
     }
   };
 
   return (
-    <div>
-      <h1>Register</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <button type="submit">Register</button>
-      </form>
+    <div className="container d-flex align-items-center justify-content-center vh-100">
+      <div
+        className="card p-4"
+        style={{ width: "25rem", backgroundColor: "#121212", color: "#00FF8A" }}
+      >
+        <h3 className="text-center mb-4">Join the Resistance</h3>
+        {error && <p className="text-danger text-center">{error}</p>}
+        {success && (
+          <p className="text-success text-center">
+            Registration successful! Redirecting to login...
+          </p>
+        )}
+        <form onSubmit={handleRegister}>
+          <div className="mb-3">
+            <label htmlFor="name" className="form-label">
+              Full Name
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your Name"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="email" className="form-label">
+              Email Address
+            </label>
+            <input
+              type="email"
+              className="form-control"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="youremail@matrix.com"
+            />
+          </div>
+          <div className="mb-3">
+            <label htmlFor="password" className="form-label">
+              Password
+            </label>
+            <input
+              type="password"
+              className="form-control"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="•••••••"
+            />
+          </div>
+          <button type="submit" className="btn btn-success w-100">
+            Register Now
+          </button>
+        </form>
+        <p className="text-center mt-3">
+          Already have an account?{" "}
+          <span
+            className="text-info"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/login")}
+          >
+            Login here
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

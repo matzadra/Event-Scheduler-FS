@@ -22,6 +22,31 @@ a {
   }
 }
 
+.matrix-style {
+  color: #00ff8a;
+  font-family: "Orbitron", sans-serif;
+  text-shadow: 0 0 10px #00ff8a;
+}
+
+.matrix-hover {
+  background-color: #121212;
+  color: #e0e0e0;
+  transition: all 0.3s ease;
+  &:hover {
+    background-color: #00ff8a;
+    color: #121212;
+  }
+}
+
+.matrix-modal-header,
+.matrix-modal-body,
+.matrix-modal-footer {
+  background-color: #1e1e1e;
+  color: #00ff8a;
+  border: none;
+  text-shadow: 0 0 5px #00ff8a;
+}
+
 button {
   background-color: $primary-color;
   color: $background-color;

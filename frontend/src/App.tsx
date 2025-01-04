@@ -7,6 +7,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Events from "./pages/Events";
 import RSVPPage from "./pages/RSVP";
+import Home from "./pages/Home";
+import "bootstrap/dist/js/bootstrap.bundle.min";
 
 const App = () => {
   return (
@@ -15,6 +17,7 @@ const App = () => {
       <BrowserRouter>
         <AppNavbar />
         <Routes>
+          <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/events" element={<Events />} />

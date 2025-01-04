@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../styles/main.scss";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -25,28 +26,24 @@ const Register = () => {
       setError("Failed to register. Please check your input.");
     }
   };
-
   return (
     <div className="container d-flex align-items-center justify-content-center vh-100">
-      <div
-        className="card p-4"
-        style={{ width: "25rem", backgroundColor: "#121212", color: "#00FF8A" }}
-      >
-        <h3 className="text-center mb-4">Join the Resistance</h3>
-        {error && <p className="text-danger text-center">{error}</p>}
+      <div className="matrix-card">
+        <h3 className="text-center matrix-heading">Join the Resistance</h3>
+        {error && <p className="matrix-error text-center">{error}</p>}
         {success && (
-          <p className="text-success text-center">
+          <p className="matrix-success text-center">
             Registration successful! Redirecting to login...
           </p>
         )}
         <form onSubmit={handleRegister}>
           <div className="mb-3">
-            <label htmlFor="name" className="form-label">
+            <label htmlFor="name" className="matrix-label">
               Full Name
             </label>
             <input
               type="text"
-              className="form-control"
+              className="matrix-input"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -54,12 +51,12 @@ const Register = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="email" className="form-label">
+            <label htmlFor="email" className="matrix-label">
               Email Address
             </label>
             <input
               type="email"
-              className="form-control"
+              className="matrix-input"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -67,29 +64,25 @@ const Register = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="password" className="form-label">
+            <label htmlFor="password" className="matrix-label">
               Password
             </label>
             <input
               type="password"
-              className="form-control"
+              className="matrix-input"
               id="password"
-              value={password}
               onChange={(e) => setPassword(e.target.value)}
+              value={password}
               placeholder="•••••••"
             />
           </div>
-          <button type="submit" className="btn btn-success w-100">
+          <button type="submit" className="matrix-btn w-100">
             Register Now
           </button>
         </form>
         <p className="text-center mt-3">
           Already have an account?{" "}
-          <span
-            className="text-info"
-            style={{ cursor: "pointer" }}
-            onClick={() => navigate("/login")}
-          >
+          <span className="matrix-link" onClick={() => navigate("/login")}>
             Login here
           </span>
         </p>

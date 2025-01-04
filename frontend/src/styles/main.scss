@@ -1,19 +1,228 @@
+// Importa customizações do Bootstrap (variáveis)
 @use "./_bootstrap-custom";
-@use "~bootstrap/scss/bootstrap";
-@use "./_globals";
 
-//react-big-calendar styles
+// Importa estilos padrão do Bootstrap
+@use "~bootstrap/scss/bootstrap";
+
+// Global Variables and Mixins
+// Matrix Theme colors
+$background-color: #121212;
+$primary-color: #00ff8a;
+$text-color-primary: #e0e0e0;
+$text-color-secondary: #b3b3b3;
+$button-hover-color: #008c4a;
+$error-color: #ff5252;
+
+// Mixins
+@mixin matrix-colors($bg-color, $text-color, $border-color: null) {
+  background-color: $bg-color;
+  color: $text-color;
+  @if $border-color {
+    border: 1px solid $border-color;
+  }
+}
+
+@mixin transition-default {
+  transition: all 0.3s ease-in-out;
+}
+
+// Base Global Styles
+body {
+  margin: 0;
+  padding: 0;
+  background-color: $background-color;
+  color: $text-color-primary;
+  font-family: "Poppins", sans-serif;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+
+  &:hover {
+    color: $button-hover-color;
+  }
+}
+.matrix-error {
+  color: #ff5252;
+  font-weight: bold;
+}
+
+.matrix-success {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+// Título com efeito digitando
+.matrix-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: $primary-color;
+  text-shadow: 0 0 10px $primary-color, 0 0 20px $primary-color;
+  margin-bottom: 20px;
+  font-family: "Roboto Mono", monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid $primary-color;
+  animation: blink 0.8s steps(2, start) infinite;
+}
+
+@keyframes blink {
+  from {
+    border-right-color: $primary-color;
+  }
+  to {
+    border-right-color: transparent;
+  }
+}
+
+// Reutilização de estilos
+.matrix-hover,
+.rsvp-list-item {
+  @include matrix-colors($background-color, $primary-color, $primary-color);
+  @include transition-default;
+
+  &:hover {
+    background-color: #1e1e1e;
+  }
+}
+
+.matrix-modal-header,
+.matrix-modal-footer {
+  @include matrix-colors($background-color, $primary-color);
+}
+
+.matrix-modal-body,
+.rsvp-list {
+  @include matrix-colors(#1e1e1e, $primary-color, $primary-color);
+}
+
+// Botões
+button {
+  @include matrix-colors($primary-color, $background-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  @include transition-default;
+
+  &:hover {
+    background-color: $button-hover-color;
+  }
+
+  &:disabled {
+    @include matrix-colors($text-color-secondary, $background-color);
+    cursor: not-allowed;
+  }
+}
+
+// Inputs
+input,
+textarea,
+select {
+  background-color: transparent;
+  border: 1px solid $primary-color;
+  color: $text-color-primary;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  outline: none;
+
+  &:focus {
+    border-color: $button-hover-color;
+    box-shadow: 0 0 5px $primary-color;
+  }
+}
+
+// Navbar
+.navbar {
+  background-color: rgba(18, 18, 18, 0.85);
+  padding: 1rem;
+  border-bottom: 1px solid $primary-color;
+
+  a {
+    color: $text-color-primary;
+    font-weight: bold;
+    margin-right: 1rem;
+
+    &:hover {
+      color: $primary-color;
+    }
+  }
+
+  .navbar-toggler {
+    border-color: $primary-color;
+
+    &:focus {
+      box-shadow: 0 0 5px $primary-color;
+    }
+
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(0, 255, 138, 1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
+  }
+}
+
+// Badge
+.badge {
+  font-size: 0.9rem;
+
+  &.bg-success {
+    background-color: $button-hover-color;
+  }
+
+  &.bg-warning {
+    background-color: #ffa500;
+  }
+
+  &.bg-danger {
+    background-color: $error-color;
+  }
+}
+
+// Home container
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: $background-color;
+  text-align: center;
+  padding: 0 20px;
+}
+
+.matrix-subtitle {
+  font-size: 1.25rem;
+  color: $text-color-secondary;
+  margin-bottom: 30px;
+}
+
+.matrix-btn-group {
+  display: flex;
+  gap: 20px;
+
+  a button {
+    width: 120px;
+    height: 40px;
+    font-size: 1rem;
+    text-transform: uppercase;
+  }
+}
+
+// react-big-calendar styles
 .rbc-today {
   background-color: #1e1e1e !important;
-  color: #00ff8a !important;
+  color: $primary-color !important;
 }
 
 .rbc-header {
-  color: #e0e0e0;
+  color: $text-color-primary;
 }
 
 .rbc-day-bg {
-  color: #b3b3b3;
+  color: $text-color-secondary;
 }
 
 .rbc-event {
@@ -21,4 +230,222 @@
   border: none;
   padding: 4px;
   border-radius: 4px;
+}
+.matrix-card {
+  width: 25rem;
+  padding: 2rem;
+  background-color: rgba(18, 18, 18, 0.9);
+  color: #00ff8a;
+  border: 1px solid #00ff8a;
+  border-radius: 10px;
+  box-shadow: 0 0 15px rgba(0, 255, 138, 0.5);
+}
+
+.matrix-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: $text-color-secondary;
+}
+
+.matrix-input {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: transparent;
+  border: 1px solid #00ff8a;
+  border-radius: 5px;
+  color: #e0e0e0;
+  font-size: 1rem;
+
+  &:focus {
+    outline: none;
+    border-color: $button-hover-color;
+    box-shadow: 0 0 10px $primary-color;
+  }
+}
+
+.matrix-btn {
+  padding: 0.75rem 1.5rem;
+  background-color: #00ff8a;
+  color: #121212;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: $button-hover-color;
+    box-shadow: 0 0 10px #00ff8a, 0 0 20px $button-hover-color;
+  }
+}
+
+.matrix-link {
+  color: #00ff8a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.3s;
+
+  &:hover {
+    color: $button-hover-color;
+  }
+}
+
+.matrix-heading {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: $primary-color;
+  margin-bottom: 1.5rem;
+  text-transform: uppercase;
+}
+
+.matrix-events-container {
+  padding: 20px;
+  color: $text-color-primary;
+}
+
+.matrix-events-title {
+  font-size: 2rem;
+  color: $primary-color;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.matrix-calendar {
+  height: 500px;
+  margin: 50px 0;
+  background-color: $background-color;
+  border: 1px solid $primary-color;
+  border-radius: 5px;
+}
+
+.matrix-list {
+  margin-top: 20px;
+  padding: 0;
+  list-style-type: none;
+
+  .matrix-list-item {
+    background-color: $background-color;
+    border: 1px solid $primary-color;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: #1e1e1e;
+      box-shadow: 0 0 10px $primary-color;
+    }
+
+    .matrix-badge {
+      margin-top: 10px;
+    }
+  }
+}
+
+/* Modal styles */
+.matrix-modal {
+  .matrix-modal-dialog {
+    background-color: $background-color;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 255, 138, 0.5);
+  }
+
+  .matrix-modal-content {
+    background-color: #2c2c2c;
+    color: $text-color-primary;
+    border-radius: 10px;
+    padding: 15px;
+  }
+
+  .matrix-modal-header {
+    border-bottom: 1px solid $primary-color;
+    color: $primary-color;
+  }
+
+  .matrix-modal-footer {
+    display: flex;
+    justify-content: space-between;
+
+    .matrix-btn-cancel {
+      @extend .matrix-btn;
+      background-color: transparent;
+      color: $primary-color;
+
+      &:hover {
+        background-color: #1e1e1e;
+      }
+    }
+
+    .matrix-btn-save {
+      @extend .matrix-btn;
+    }
+
+    .matrix-btn-delete {
+      @extend .matrix-btn;
+      background-color: $error-color;
+    }
+  }
+}
+.rsvp-list {
+  background-color: #1e1e1e;
+  border: 1px solid #00ff8a;
+  color: #00ff8a;
+}
+
+.rsvp-list-item {
+  padding: 10px;
+  margin: 5px 0;
+  border: 1px solid #00ff8a;
+  background-color: #121212;
+  transition: background-color 0.3s ease-in-out;
+}
+
+.rsvp-list-item:hover {
+  background-color: #1e1e1e;
+}
+
+.badge {
+  font-size: 0.9rem;
+}
+
+.badge.bg-success {
+  background-color: #008c4a;
+}
+
+.badge.bg-warning {
+  background-color: #ffa500;
+}
+
+.badge.bg-danger {
+  background-color: #ff5252;
+}
+
+.list-group {
+  margin-top: 20px;
+  padding: 0;
+  list-style-type: none;
+
+  .list-group-item {
+    color: $text-color-primary;
+    background-color: $background-color;
+    border: 1px solid $primary-color;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      color: $text-color-primary;
+      background-color: #1e1e1e;
+      box-shadow: 0 0 10px $primary-color;
+    }
+
+    .matrix-badge {
+      margin-top: 10px;
+    }
+  }
 }

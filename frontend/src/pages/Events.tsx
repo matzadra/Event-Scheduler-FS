@@ -6,6 +6,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { format, parse, startOfWeek, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import "../styles/main.scss";
 
 const locales = { "pt-BR": ptBR };
 const localizer = dateFnsLocalizer({
@@ -207,9 +208,9 @@ const Events = () => {
   }, [fetchEvents]);
 
   return (
-    <div className="container">
-      <h1>Your Events</h1>
-      <button className="btn btn-primary mb-3" onClick={() => openModal()}>
+    <div className="matrix-events-container">
+      <h1 className="matrix-events-title">Your Events</h1>
+      <button className="btn matrix-btn mb-3" onClick={() => openModal()}>
         Add Event
       </button>
       {events.length > 0 ? (
@@ -219,6 +220,7 @@ const Events = () => {
           startAccessor="start"
           endAccessor="end"
           titleAccessor="title"
+          className="matrix-calendar"
           style={{ height: 500, margin: "50px 0" }}
           eventPropGetter={eventStyleGetter}
           onSelectEvent={(event) =>
@@ -231,18 +233,17 @@ const Events = () => {
         <p>Loading events...</p>
       )}
       <div className="mt-4">
-        <h2>All Participated Events</h2>
-        <ul className="list-group matrix-style">
+        <h2 className="matrix-events-title">All Participated Events</h2>
+        <ul className="matrix-list">
           {events.map((event) => (
             <li
               key={event.id}
-              className="list-group-item matrix-hover"
+              className="matrix-list-item"
               onClick={
                 event.accepted
                   ? () => toast.info("Accepted events cannot be edited.")
                   : () => openModal(event)
               }
-              style={{ cursor: "pointer" }}
             >
               <strong>{event.title}</strong> <br />
               From: {event.start.toLocaleString()} <br />
@@ -253,7 +254,9 @@ const Events = () => {
                 </p>
               )}
               <span
-                className={`badge ${event.accepted ? "bg-info" : "bg-success"}`}
+                className={`badge matrix-badge ${
+                  event.accepted ? "bg-info" : "bg-success"
+                }`}
               >
                 {event.accepted ? "Accepted Invite" : "Created"}
               </span>
@@ -261,26 +264,11 @@ const Events = () => {
           ))}
         </ul>
       </div>
-
       {showModal && (
-        <div
-          className="modal show d-block"
-          tabIndex={-1}
-          style={{ zIndex: 1050 }}
-        >
-          <div
-            className="modal-dialog"
-            style={{
-              backgroundColor: "#1a1a1a",
-              borderRadius: "8px",
-              padding: "10px",
-            }}
-          >
-            <div
-              className="modal-content"
-              style={{ backgroundColor: "#2c2c2c", color: "#ffffff" }}
-            >
-              <div className="modal-header">
+        <div className="modal show d-block matrix-modal" tabIndex={-1}>
+          <div className="modal-dialog matrix-modal-dialog">
+            <div className="modal-content matrix-modal-content">
+              <div className="modal-header matrix-modal-header">
                 <h5 className="modal-title">
                   {currentEvent ? "Edit Event" : "Add Event"}
                 </h5>
@@ -319,16 +307,19 @@ const Events = () => {
                   />
                 </div>
               </div>
-              <div className="modal-footer">
+              <div className="modal-footer matrix-modal-footer">
                 {currentEvent && (
-                  <button className="btn btn-danger" onClick={deleteEvent}>
+                  <button
+                    className="btn matrix-btn-delete"
+                    onClick={deleteEvent}
+                  >
                     Delete
                   </button>
                 )}
-                <button className="btn btn-secondary" onClick={closeModal}>
+                <button className="btn matrix-btn-cancel" onClick={closeModal}>
                   Cancel
                 </button>
-                <button className="btn btn-success" onClick={saveEvent}>
+                <button className="btn matrix-btn-save" onClick={saveEvent}>
                   Save
                 </button>
               </div>

@@ -3,6 +3,7 @@ import axios from "axios";
 import { Modal, Button, Form, ListGroup, Badge } from "react-bootstrap";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import "../styles/main.scss";
 
 const RSVPPage = () => {
   const [users, setUsers] = useState<any[]>([]);

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import "../styles/main.scss";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -35,20 +36,17 @@ const Login = () => {
 
   return (
     <div className="container d-flex align-items-center justify-content-center vh-100">
-      <div
-        className="card p-4"
-        style={{ width: "25rem", backgroundColor: "#121212", color: "#00FF8A" }}
-      >
-        <h3 className="text-center mb-4">Welcome Back, Neo</h3>
-        {error && <p className="text-danger text-center">{error}</p>}
+      <div className="matrix-card">
+        <h3 className="text-center matrix-heading">Welcome Back, Neo</h3>
+        {error && <p className="matrix-error text-center">{error}</p>}
         <form onSubmit={handleLogin}>
           <div className="mb-3">
-            <label htmlFor="email" className="form-label">
+            <label htmlFor="email" className="matrix-label">
               Email Address
             </label>
             <input
               type="email"
-              className="form-control"
+              className="matrix-input"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -56,29 +54,25 @@ const Login = () => {
             />
           </div>
           <div className="mb-3">
-            <label htmlFor="password" className="form-label">
+            <label htmlFor="password" className="matrix-label">
               Password
             </label>
             <input
               type="password"
-              className="form-control"
+              className="matrix-input"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="•••••••"
             />
           </div>
-          <button type="submit" className="btn btn-success w-100">
+          <button type="submit" className="matrix-btn w-100">
             Enter the Matrix
           </button>
         </form>
         <p className="text-center mt-3">
           Not a user?{" "}
-          <span
-            className="text-info"
-            style={{ cursor: "pointer" }}
-            onClick={() => navigate("/register")}
-          >
+          <span className="matrix-link" onClick={() => navigate("/register")}>
             Register now
           </span>
         </p>

@@ -94,7 +94,24 @@ const Events = () => {
 
   const saveEvent = async () => {
     try {
+      // Verificar conflitos de sobreposição
+      const newStart = new Date(startTime);
+      const newEnd = new Date(endTime);
+
+      const hasConflict = events.some(
+        (existingEvent) =>
+          newStart < existingEvent.end &&
+          newEnd > existingEvent.start &&
+          (!currentEvent || existingEvent.id !== currentEvent.id) // Ignorar o próprio evento ao editar
+      );
+
+      if (hasConflict) {
+        toast.error("This event conflicts with an existing one!");
+        return;
+      }
+
       if (currentEvent) {
+        // Editando evento existente
         const response = await axios.patch(
           `http://localhost:3000/events/${currentEvent.id}`,
           { description, startTime, endTime },
@@ -114,6 +131,7 @@ const Events = () => {
         );
         toast.success("Event updated successfully!");
       } else {
+        // Criando novo evento
         const response = await axios.post(
           "http://localhost:3000/events",
           { description, startTime, endTime },
@@ -130,6 +148,7 @@ const Events = () => {
         ]);
         toast.success("Event created successfully!");
       }
+
       closeModal();
     } catch (err) {
       toast.error("Failed to save event.");

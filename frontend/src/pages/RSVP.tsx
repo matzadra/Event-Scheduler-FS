@@ -224,7 +224,13 @@ const RSVPPage = () => {
                 <strong>From:</strong> {invite.inviter.name} <br />
                 <strong>Status:</strong>{" "}
                 <Badge
-                  bg={invite.status === "pending" ? "warning" : "success"}
+                  bg={
+                    invite.status === "pending"
+                      ? "warning"
+                      : invite.status === "accepted"
+                      ? "success"
+                      : "danger"
+                  }
                   className="matrix-badge"
                 >
                   {invite.status.toUpperCase()}

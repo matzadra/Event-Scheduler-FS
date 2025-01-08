@@ -11,3 +11,10 @@ export const registerUser = async (
     password,
   });
 };
+
+export const fetchUsers = async (token: string, userId: string) => {
+  const response = await axios.get("http://localhost:3000/users", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data.filter((user: any) => user.id !== userId);
+};

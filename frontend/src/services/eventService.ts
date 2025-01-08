@@ -68,3 +68,95 @@ export const parseAcceptedEvents = (invites: any[]) =>
       accepted: true,
       inviterName: invite.inviter.name,
     }));
+
+export const validateEventConflict = async (
+  token: string,
+  inviteStartTime: Date,
+  inviteEndTime: Date
+) => {
+  const fetchedEvents = await axios.get("http://localhost:3000/events", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  const fetchedAcceptedInvites = await axios.get(
+    "http://localhost:3000/events/rsvp",
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  const createdEvents = fetchedEvents.data.map((event: any) => ({
+    start: new Date(event.startTime),
+    end: new Date(event.endTime),
+  }));
+
+  const acceptedEvents = fetchedAcceptedInvites.data.received
+    .filter((invite: any) => invite.status === "accepted")
+    .map((invite: any) => ({
+      start: new Date(invite.event.startTime),
+      end: new Date(invite.event.endTime),
+    }));
+
+  const allEvents = [...createdEvents, ...acceptedEvents];
+
+  const hasConflict = allEvents.some(
+    (existingEvent) =>
+      existingEvent.start < inviteEndTime && existingEvent.end > inviteStartTime
+  );
+
+  return hasConflict;
+};
+
+export const fetchInvites = async (token: string) => {
+  const response = await axios.get("http://localhost:3000/events/rsvp", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
+
+export const fetchUserEvents = async (token: string, userId: string) => {
+  const response = await axios.get("http://localhost:3000/events", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data.filter((event: any) => event.owner.id === userId);
+};
+
+export const sendInvite = async (
+  token: string,
+  eventId: string,
+  userId: string
+) => {
+  await axios.post(
+    `http://localhost:3000/events/${eventId}/invite`,
+    { userId },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+};
+
+export const fetchAcceptedInvites = async (token: string) => {
+  const response = await axios.get("http://localhost:3000/events/rsvp", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  return response.data.received
+    .filter((invite: any) => invite.status === "accepted")
+    .map((invite: any) => ({
+      ...invite.event,
+      start: new Date(invite.event.startTime),
+      end: new Date(invite.event.endTime),
+    }));
+};
+
+export const updateInviteStatusService = async (
+  token: string,
+  eventId: string,
+  inviteId: string,
+  status: "accepted" | "rejected"
+) => {
+  const response = await axios.patch(
+    `http://localhost:3000/events/${eventId}/invite/${inviteId}`,
+    { status },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
+};

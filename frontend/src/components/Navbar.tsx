@@ -1,13 +1,14 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import "bootstrap/dist/js/bootstrap.bundle.min";
 
 const Navbar = () => {
-  const token = localStorage.getItem("token");
+  const { token, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    logout();
     navigate("/login");
   };
 
@@ -31,27 +32,7 @@ const Navbar = () => {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             {token ? (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link text-success" to="/events">
-                    Events
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link text-success" to="/rsvp">
-                    RSVPs
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <span
-                    className="nav-link text-danger"
-                    style={{ cursor: "pointer" }}
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </span>
-                </li>
-              </>
+              <AuthenticatedLinks onLogout={handleLogout} />
             ) : (
               <li className="nav-item">
                 <Link className="nav-link text-success" to="/login">
@@ -65,5 +46,32 @@ const Navbar = () => {
     </nav>
   );
 };
+
+// sub-component to add authenticated links
+const AuthenticatedLinks: React.FC<{ onLogout: () => void }> = ({
+  onLogout,
+}) => (
+  <>
+    <li className="nav-item">
+      <Link className="nav-link text-success" to="/events">
+        Events
+      </Link>
+    </li>
+    <li className="nav-item">
+      <Link className="nav-link text-success" to="/rsvp">
+        RSVPs
+      </Link>
+    </li>
+    <li className="nav-item">
+      <span
+        className="nav-link text-danger"
+        style={{ cursor: "pointer" }}
+        onClick={onLogout}
+      >
+        Logout
+      </span>
+    </li>
+  </>
+);
 
 export default Navbar;

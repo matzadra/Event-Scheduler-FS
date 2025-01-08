@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 interface EventFormModalProps {
   show: boolean;
   onClose: () => void;
@@ -24,6 +23,18 @@ const EventFormModal: React.FC<EventFormModalProps> = ({
   );
   const [startTime, setStartTime] = useState(initialData?.startTime || "");
   const [endTime, setEndTime] = useState(initialData?.endTime || "");
+
+  useEffect(() => {
+    if (initialData) {
+      setDescription(initialData.description || "");
+      setStartTime(initialData.startTime || "");
+      setEndTime(initialData.endTime || "");
+    } else {
+      setDescription("");
+      setStartTime("");
+      setEndTime("");
+    }
+  }, [initialData]);
 
   const handleSave = () => {
     onSave({ description, startTime, endTime });

@@ -10,6 +10,7 @@ import Events from "./pages/Events";
 import RSVPPage from "./pages/RSVP";
 import Home from "./pages/Home";
 import "bootstrap/dist/js/bootstrap.bundle.min";
+import "react-toastify/dist/ReactToastify.css";
 
 const App = () => {
   return (

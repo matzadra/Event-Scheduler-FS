@@ -1,4 +1,5 @@
 import React from "react";
+import { AuthProvider } from "./contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -12,7 +13,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min";
 
 const App = () => {
   return (
-    <div>
+    <AuthProvider>
       <ToastContainer />
       <BrowserRouter>
         <AppNavbar />
@@ -24,7 +25,7 @@ const App = () => {
           <Route path="/rsvp" element={<RSVPPage />} />
         </Routes>
       </BrowserRouter>
-    </div>
+    </AuthProvider>
   );
 };
 

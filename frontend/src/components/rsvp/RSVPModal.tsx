@@ -8,6 +8,7 @@ interface RSVPModalProps {
   userEvents: any[];
   selectedEventId: string | null;
   setSelectedEventId: (id: string) => void;
+  isSending: boolean;
 }
 
 const RSVPModal: React.FC<RSVPModalProps> = ({
@@ -17,10 +18,15 @@ const RSVPModal: React.FC<RSVPModalProps> = ({
   userEvents,
   selectedEventId,
   setSelectedEventId,
+  isSending,
 }) => (
   <Modal show={show} onHide={onClose}>
     <Modal.Header closeButton className="matrix-modal-header">
-      <Modal.Title>Select Event</Modal.Title>
+      {userEvents.length <= 0 ? (
+        <Modal.Title>No events found.</Modal.Title>
+      ) : (
+        <Modal.Title>Select Event</Modal.Title>
+      )}
     </Modal.Header>
     <Modal.Body className="matrix-modal-body">
       <Form>
@@ -45,8 +51,8 @@ const RSVPModal: React.FC<RSVPModalProps> = ({
       <Button variant="secondary" onClick={onClose}>
         Cancel
       </Button>
-      <Button variant="primary" onClick={onSend}>
-        Send Invite
+      <Button variant="primary" onClick={onSend} disabled={isSending}>
+        {isSending ? "Sending..." : "Send Invite"}
       </Button>
     </Modal.Footer>
   </Modal>

@@ -2,7 +2,12 @@ import React, { useState, useEffect } from "react";
 import { ListGroup } from "react-bootstrap";
 import "react-toastify/dist/ReactToastify.css";
 import "../styles/main.scss";
-import { showError, showSuccess } from "../utils/toastMessages";
+import {
+  showError,
+  showSuccess,
+  showDynamicToast,
+  updateToast,
+} from "../utils/toastMessages";
 import { useAuth } from "../contexts/AuthContext";
 import { ReceivedInvite, SentInvite } from "../types/invites";
 import { fetchUsers } from "../services/userService";
@@ -23,10 +28,11 @@ const RSVPPage = () => {
   const [receivedInvites, setReceivedInvites] = useState<ReceivedInvite[]>([]);
   const [sentInvites, setSentInvites] = useState<SentInvite[]>([]);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [userEvents] = useState<any[]>([]);
+  const [userEvents, setUserEvents] = useState<any[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [events, setEvents] = useState<any[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
   const { token } = useAuth();
   const { userId } = useAuth();
@@ -44,6 +50,10 @@ const RSVPPage = () => {
         const invites = await fetchInvites(token);
         setReceivedInvites(invites.received);
         setSentInvites(invites.sent);
+
+        setSelectedUser(userId);
+        const userEvents = await fetchUserEvents(token, userId);
+        setUserEvents(userEvents);
 
         const acceptedEvents = await fetchAcceptedInvites(token);
         setEvents((prevEvents) => [...prevEvents, ...acceptedEvents]);
@@ -103,26 +113,30 @@ const RSVPPage = () => {
       showError("Missing required information to send an invite.");
       return;
     }
+    setIsSending(true);
+    const processingToastId = showDynamicToast("Sending invite...", {
+      autoClose: false,
+      type: "info",
+    });
     try {
       await sendInvite(token, selectedEventId, selectedUser);
-      showSuccess("Invite sent successfully!");
+      const invites = await fetchInvites(token);
+      setSentInvites(invites.sent);
+      updateToast(processingToastId, {
+        render: "Invite sent successfully!",
+        type: "success",
+        autoClose: 3000,
+      });
+      setSelectedEventId(null);
       setShowModal(false);
     } catch (err) {
-      showError("Failed to send invite.");
-    }
-  };
-
-  const handleUserClick = async () => {
-    if (!token || !userId) {
-      showError("User not authenticated.");
-      return;
-    }
-    try {
-      setSelectedUser(userId);
-      await fetchUserEvents(token, userId);
-      setShowModal(true);
-    } catch (err) {
-      showError("Failed to fetch user events.");
+      updateToast(processingToastId, {
+        render: "Failed to send invite.",
+        type: "error",
+        autoClose: false,
+      });
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -132,18 +146,23 @@ const RSVPPage = () => {
       <div className="mb-4">
         <h3 className="matrix-style">Users</h3>
         <ListGroup>
-          {users.map((user) => (
-            <ListGroup.Item
-              key={user.id}
-              action
-              className="matrix-hover"
-              onClick={() => {
-                handleUserClick();
-              }}
-            >
-              {user.name}
-            </ListGroup.Item>
-          ))}
+          {users.length > 0 ? (
+            users.map((user) => (
+              <ListGroup.Item
+                key={user.id}
+                action
+                className="matrix-hover"
+                onClick={() => {
+                  setSelectedUser(user.id);
+                  setShowModal(true);
+                }}
+              >
+                {user.name}
+              </ListGroup.Item>
+            ))
+          ) : (
+            <p>Loading users list...</p>
+          )}
         </ListGroup>
       </div>
       <div className="mb-4">
@@ -163,13 +182,16 @@ const RSVPPage = () => {
       </div>
       <RSVPModal
         show={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          setSelectedEventId(null);
+        }}
         onSend={handleSendInvite}
         userEvents={userEvents}
         selectedEventId={selectedEventId}
         setSelectedEventId={setSelectedEventId}
+        isSending={isSending}
       />
-      ;
     </div>
   );
 };

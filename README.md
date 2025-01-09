@@ -1,6 +1,6 @@
-# Event Scheduler
+# Event Scheduler (Refactored Version)
 
-A modern and robust event scheduling system designed with scalability, maintainability, and user experience in mind. This project integrates a powerful backend with a dynamic, componentized frontend.
+This is a refactored and improved version of a project previously available on my GitHub. It incorporates lessons learned and advancements in design and implementation to deliver a more robust, maintainable, and user-friendly solution.
 
 ---
 
@@ -22,7 +22,7 @@ The frontend is built with a nearly total componentization approach, enabling cl
 
 ### **Frontend**
 - **React** with **TypeScript**: Dynamic, scalable, and maintainable user interface.
-- **Tailwind CSS**: Quickly build consistent and responsive designs.
+- **Bootstrap CSS**: Quickly build consistent and responsive designs.
 - **React-Query**: Optimized state management for API interactions.
 - **React Toastify**: Elegant and interactive user notifications.
 - **React-Router**: Smooth navigation and routing.
